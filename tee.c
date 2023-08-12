@@ -1,6 +1,6 @@
-#include <fcntl.h> // open
-#include <unistd.h>  // read/write/close
+#include <fcntl.h>   // open
 #include <stdbool.h> // bool type
+#include <unistd.h>  // read/write/close
 
 // O_TRUNC overwrites existing file content
 #define DEFAULT_FLAGS (O_WRONLY | O_CREAT | O_TRUNC)
@@ -21,24 +21,23 @@ int main(int argc, char *argv[]) {
   // Set first output as stdout
   fds[0] = STDOUT_FILENO;
   // Read next outfiles from argv
-  for (size_t i = 1; i < argc; i++) {
+  for (int i = 1; i < argc; i++) {
     fds[i] = open(argv[i], DEFAULT_FLAGS, DEFAULT_PERMISSIONS);
   }
 
-  char buffer [2048];
+  char buffer[2048];
   while (true) {
     ssize_t bitsRead = read(STDIN_FILENO, buffer, sizeof(buffer));
     if (bitsRead == 0) {
       break;
     }
 
-    for (size_t i = 0; i < argc; i++) {
+    for (int i = 0; i < argc; i++) {
       writeBuffToFile(fds[i], buffer, bitsRead);
     }
-
   }
 
-  for (size_t i = 0; i < argc; i++) {
+  for (int i = 0; i < argc; i++) {
     close(fds[i]);
   }
 
