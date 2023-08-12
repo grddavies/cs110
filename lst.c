@@ -61,14 +61,14 @@ static void ListDir(char *path, bool all, bool perms) {
       break;
     }
     strcpy(path + length, entry->d_name);
+    if (!all && path[length] == '.') {
+      // File is hidden
+      continue;
+    }
     if (perms) {
       PrintPerms(path, basePathLen);
     } else {
-      if (all) {
-        printf("%s\n", entry->d_name);
-      } else if (path[length] != '.') {
-        printf("%s\n", entry->d_name);
-      }
+      printf("%s\n", entry->d_name);
     }
   }
   closedir(dir);
@@ -79,14 +79,16 @@ int main(int argc, char *argv[]) {
   // TODO: flag parsing for -a, -l
   assert(argc == 2);
   char *directory = argv[1];
+  bool l = true;
+  bool a = true;
 
   struct stat st_buff;
   lstat(directory, &st_buff);
 
   if (S_ISDIR(st_buff.st_mode)) {
-    ListDir(directory, false, true);
+    ListDir(directory, a, l);
   } else {
-    if (true) {
+    if (l) {
       PrintPerms(directory, 0);
     } else {
       printf("%s\n", argv[1]);
