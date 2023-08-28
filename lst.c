@@ -1,12 +1,14 @@
-#include <assert.h>
 #include <dirent.h>
+#include <errno.h>
 #include <grp.h>
 #include <pwd.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 static const char kPermissionChars[] = {'r', 'w', 'x'};
 static const mode_t kPermissionFlags[] = {
@@ -76,11 +78,31 @@ static void ListDir(char *path, bool all, bool perms) {
 
 // List all entries in a directory
 int main(int argc, char *argv[]) {
-  // TODO: flag parsing for -a, -l
-  assert(argc == 2);
-  char *directory = argv[1];
-  bool l = true;
-  bool a = true;
+  bool l = false;
+  bool a = false;
+  char *directory = NULL;
+
+  int opt;
+  while ((opt = getopt(argc, argv, "la")) != -1) {
+    switch (opt) {
+    case 'l':
+      l = true;
+      break;
+    case 'a':
+      a = true;
+      break;
+    default:
+      fprintf(stderr, "Usage: %s [-l] [-a] directory\n", argv[0]);
+      exit(EXIT_FAILURE);
+    }
+  }
+
+  if (optind < argc) {
+    directory = argv[optind];
+  } else {
+    fprintf(stderr, "Usage: %s [-l] [-a] directory\n", argv[0]);
+    exit(EXIT_FAILURE);
+  }
 
   struct stat st_buff;
   lstat(directory, &st_buff);
